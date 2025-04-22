@@ -42,8 +42,8 @@ pub struct Grid {
 
 impl std::fmt::Display for Grid {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        for y in 1..=self.height {
-            for x in 1..=self.width {
+        for y in 0..self.height {
+            for x in 0..self.width {
                 let cell = self.get(x, y);
 
                 let _ = match cell.state {
@@ -61,8 +61,8 @@ impl Grid {
     pub fn new(width: u16, height: u16) -> Self {
         let mut cells = HashMap::new();
 
-        for y in 1..=height {
-            for x in 1..=width {
+        for y in 0..height {
+            for x in 0..width {
                 let coordinates = Coordinates { x, y };
                 let cell = Cell::new(coordinates.clone(), get_rand_bool());
 
