@@ -1,27 +1,25 @@
-use std::{cmp, collections::HashMap};
+use std::collections::HashMap;
 
-#[derive(Debug)]
-enum State {
+#[derive(Debug, PartialEq, Clone)]
+enum CellState {
     Alive,
     Dead,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct Cell {
     coordinates: Coordinates,
-    state: State,
+    state: CellState,
 }
 
 impl Cell {
     pub fn new(coordinates: Coordinates, is_alive: bool) -> Self {
-        match is_alive {
-            true => Self {
-                coordinates,
-                state: State::Alive,
-            },
-            false => Self {
-                coordinates,
-                state: State::Dead,
+        Self {
+            coordinates,
+            state: if is_alive {
+                CellState::Alive
+            } else {
+                CellState::Dead
             },
         }
     }
@@ -29,8 +27,8 @@ impl Cell {
 
 #[derive(Debug, PartialEq, Eq, Hash, Clone)]
 pub struct Coordinates {
-    x: u16,
-    y: u16,
+    pub x: u16,
+    pub y: u16,
 }
 
 #[derive(Debug)]
@@ -46,12 +44,12 @@ impl std::fmt::Display for Grid {
             for x in 0..self.width {
                 let cell = self.get(x, y);
 
-                let _ = match cell.state {
-                    State::Alive => write!(f, "#"),
-                    State::Dead => write!(f, "_"),
+                match cell.state {
+                    CellState::Alive => write!(f, "#")?,
+                    CellState::Dead => write!(f, "_")?,
                 };
             }
-            let _ = writeln!(f);
+            writeln!(f)?;
         }
         Ok(())
     }
@@ -67,7 +65,6 @@ impl Grid {
                 let cell = Cell::new(coordinates.clone(), get_rand_bool());
 
                 cells.insert(coordinates, cell);
-                println!("Grid::new creating cell {x}, {y}");
             }
         }
 
@@ -80,38 +77,41 @@ impl Grid {
 
     pub fn get(&self, x: u16, y: u16) -> &Cell {
         let coordinates = Coordinates { x, y };
-        match self.cells.get(&coordinates) {
-            Some(cell) => cell,
-            None => panic!("Cell for coordinates {x}, {y} is not found"),
-        }
+
+        self.cells
+            .get(&coordinates)
+            .expect("Cell for coordinates {x}, {y} is not found")
     }
 
     pub fn get_neighbors(&self, cell: &Cell) -> Vec<&Cell> {
-        let cx = cell.coordinates.x;
-        let cy = cell.coordinates.y;
+        let cx = cell.coordinates.x as i32;
+        let cy = cell.coordinates.y as i32;
+        let width = self.width;
+        let height = self.height;
 
         let mut neighbors = Vec::with_capacity(8);
 
         // Check bounds of the world
-        let from_x = cmp::max(cx - 1, 1);
-        let from_y = cmp::max(cy - 1, 1);
-        let to_x = cmp::min(cx + 1, self.width);
-        let to_y = cmp::min(cy + 1, self.height);
-
-        for x in from_x..=to_x {
-            for y in from_y..=to_y {
-                // skip self
-                if x == cx && y == cy {
+        for dx in -1..=1 {
+            for dy in -1..=1 {
+                if dx == 0 && dy == 0 {
                     continue;
                 }
 
-                let cell = self.get(x, y);
-                neighbors.push(cell);
+                let nx = wrap_coords(cx + dx, width);
+                let ny = wrap_coords(cy + dy, height);
+
+                neighbors.push(self.get(nx, ny))
             }
         }
 
         neighbors
     }
+}
+
+fn wrap_coords(coord: i32, max: u16) -> u16 {
+    let max = max as i32;
+    (((coord % max) + max) % max) as u16
 }
 
 fn get_rand_bool() -> bool {
