@@ -144,5 +144,5 @@ fn wrap_coords(coord: i32, max: u16) -> u16 {
 }
 
 fn get_rand_bool() -> bool {
-    fastrand::choice([true, false, false, false]).unwrap()
+    fastrand::choice([true, false, false]).unwrap()
 }

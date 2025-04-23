@@ -1,14 +1,25 @@
+use std::{thread::sleep, time::Duration};
+
 use game::Game;
 
+mod display;
 mod game;
 mod grid;
 
 fn main() {
-    let mut game = Game::new(20);
-    println!("{}", game.grid);
+    let mut game = Game::new(60);
 
-    for i in 1..=10 {
+    while game.is_alive {
+        display::clear_terminal();
+        display::render(&game.grid);
+
         game.next_gen();
-        println!("{}", game.grid);
+
+        sleep(Duration::new(1, 100));
     }
+
+    println!(
+        "Game over! Your world leaved for {} generations.",
+        game.generation
+    )
 }
