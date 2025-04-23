@@ -6,18 +6,17 @@ pub struct Game {
     pub grid: Grid,
     pub generation: u32,
     pub is_alive: bool,
-    pub size: u16,
 }
 
 impl Game {
     pub fn new(size: u16) -> Self {
         Self {
-            grid: Grid::new(size, size * 2),
+            grid: Grid::new_rand(size, size * 2, 20),
             generation: 0,
             is_alive: true,
-            size,
         }
     }
+
     pub fn next_gen(&mut self) {
         let mut is_alive = false;
         let mut ncells: HashMap<Coordinates, Cell> = HashMap::new();
@@ -40,12 +39,6 @@ impl Game {
         self.generation += 1;
         self.grid = Grid::new_with_cells(self.grid.width(), self.grid.height(), ncells);
     }
-
-    pub fn reset(&mut self) {
-        self.grid = Grid::new(self.size, self.size * 2);
-        self.generation = 0;
-        self.is_alive = true;
-    }
 }
 
 fn count_alive_neighbors(grid: &Grid, coordinates: &Coordinates) -> u16 {
@@ -56,7 +49,7 @@ fn count_alive_neighbors(grid: &Grid, coordinates: &Coordinates) -> u16 {
 }
 
 fn mutate_alive_cell(alive_neighbors: u16) -> Cell {
-    let is_alive = alive_neighbors == 2 && alive_neighbors == 3;
+    let is_alive = alive_neighbors == 2 || alive_neighbors == 3;
     Cell::new(is_alive)
 }
 

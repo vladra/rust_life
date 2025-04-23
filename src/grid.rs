@@ -64,13 +64,17 @@ impl std::fmt::Display for Grid {
 }
 
 impl Grid {
-    pub fn new(width: u16, height: u16) -> Self {
+    pub fn new_empty(width: u16, height: u16) -> Self {
+        Self::new_rand(width, height, 0)
+    }
+
+    pub fn new_rand(width: u16, height: u16, chance_of_true: u8) -> Self {
         let mut cells = HashMap::new();
 
-        for y in 0..height {
-            for x in 0..width {
+        for x in 0..width {
+            for y in 0..height {
                 let coordinates = Coordinates { x, y };
-                let cell = Cell::new(get_rand_bool());
+                let cell = Cell::new(get_rand_bool(chance_of_true));
 
                 cells.insert(coordinates, cell);
             }
@@ -84,6 +88,19 @@ impl Grid {
             width,
             height,
             cells,
+        }
+    }
+
+    pub fn inject_shape_at(&mut self, x: u16, y: u16, shape: &str) {
+        let shape_arr = match shape {
+            "pulsar" => shape_pulsar(x, y),
+            "diehard" => shape_diehard(x, y),
+            _ => vec![],
+        };
+
+        for (x, y, is_alive) in shape_arr {
+            self.cells
+                .insert(Coordinates::new(x, y), Cell::new(is_alive));
         }
     }
 
@@ -143,6 +160,51 @@ fn wrap_coords(coord: i32, max: u16) -> u16 {
     (((coord % max) + max) % max) as u16
 }
 
-fn get_rand_bool() -> bool {
-    fastrand::choice([true, false, false, false, false, false, false, false]).unwrap()
+/// Returns a boolean value with a specified probability of being `true`.
+///
+/// This function generates a random integer between 0 and 99, and returns `true`
+/// if `chance_of_true` is greater than that random number.
+///
+/// # Arguments
+///
+/// * `chance_of_true` - A value between 0 and 100 representing the percentage chance of returning `true`
+///
+/// # Returns
+///
+/// A boolean with a `chance_of_true`% probability of being `true`.
+///
+/// # Panics
+///
+/// Panics if `chance_of_true` is not within the valid range (0-100).
+fn get_rand_bool(chance_of_true: u8) -> bool {
+    let n = fastrand::u8(0..100);
+
+    if n > 100 {
+        panic!("chance_of_true must be >= 0 and <= 100")
+    }
+
+    chance_of_true > n
+}
+
+fn shape_pulsar(x: u16, y: u16) -> Vec<(u16, u16, bool)> {
+    vec![
+        (x, y, false),
+        (x + 1, y, true),
+        (x + 2, y, true),
+        (x, y + 1, true),
+        (x + 1, y + 1, true),
+        (x + 2, y + 1, false),
+        (x, y + 2, false),
+        (x + 1, y + 2, true),
+        (x + 2, y + 2, false),
+    ]
+}
+
+fn shape_diehard(x: u16, y: u16) -> Vec<(u16, u16, bool)> {
+    vec![
+        (x, y, true),
+        (x + 1, y, true),
+        (x, y + 1, false),
+        (x + 1, y + 1, true),
+    ]
 }
