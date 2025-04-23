@@ -1,16 +1,14 @@
+use game::Game;
+
+mod game;
 mod grid;
 
 fn main() {
-    let grid = grid::Grid::new(20, 10);
-    println!("{grid}");
+    let mut game = Game::new(20);
+    println!("{}", game.grid);
 
-    let corner_top_cell = grid.get(0, 0);
-    println!("{corner_top_cell:?}");
-    let mid_cell = grid.get(2, 3);
-    println!("{mid_cell:?}");
-    let corner_bottom_cell = grid.get(19, 9);
-    println!("{corner_bottom_cell:?}");
-
-    let neighboors = grid.get_neighbors(mid_cell);
-    println!("{neighboors:?}");
+    for i in 1..=10 {
+        game.next_gen();
+        println!("{}", game.grid);
+    }
 }
