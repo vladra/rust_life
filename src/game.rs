@@ -6,6 +6,7 @@ pub struct Game {
     pub grid: Grid,
     pub generation: u32,
     pub is_alive: bool,
+    pub size: u16,
 }
 
 impl Game {
@@ -14,6 +15,7 @@ impl Game {
             grid: Grid::new(size, size * 2),
             generation: 0,
             is_alive: true,
+            size,
         }
     }
     pub fn next_gen(&mut self) {
@@ -37,6 +39,12 @@ impl Game {
         self.is_alive = is_alive;
         self.generation += 1;
         self.grid = Grid::new_with_cells(self.grid.width(), self.grid.height(), ncells);
+    }
+
+    pub fn reset(&mut self) {
+        self.grid = Grid::new(self.size, self.size * 2);
+        self.generation = 0;
+        self.is_alive = true;
     }
 }
 

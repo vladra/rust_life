@@ -1,6 +1,14 @@
-use crate::grid::{CellState, Grid};
+use crate::{
+    game::Game,
+    grid::{CellState, Grid},
+};
 
-pub fn render(grid: &Grid) {
+pub fn render(game: &Game) {
+    render_grid(&game.grid);
+    render_stats(game);
+}
+
+pub fn render_grid(grid: &Grid) {
     let width = grid.width();
     let height = grid.height();
 
@@ -29,6 +37,11 @@ pub fn render(grid: &Grid) {
         print!("─");
     }
     println!("┘");
+    println!("")
+}
+
+pub fn render_stats(game: &Game) {
+    println!("Generation: {}", game.generation);
 }
 
 pub fn clear_terminal() {
